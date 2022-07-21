@@ -6,13 +6,18 @@
  * 		Because even though the idea is right, but the cost is too much.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
+#include <iostream>
+#include <cstring>
+#include <cmath>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <array>
 
-#define CAN 1
-#define NO 0
+using namespace std;
+
+const int CAN = 1;
+const int NO = 0;
 
 int bx, by, mx, my;
 int map[25][25];
@@ -21,11 +26,9 @@ int set(int x, int y, int val);
 int get(int x, int y);
 int go(int x, int y);
 
-int arrive_c = 0;
-
 int main() {
 	memset(map, NO, 25 * 25);
-	scanf("%d%d%d%d", &bx, &by, &mx, &my);
+	cin >> bx >> by >> mx >> my;
 
 	for (int i = 0; i <= bx; i++) {
 		for (int j = 0; j <= by; j++) {
@@ -44,7 +47,7 @@ int main() {
 	set(mx - 2, my + 1, NO);
 	set(mx - 2, my - 1, NO);
 
-	printf("%d\n", go(0, 0));
+	cout << go(0, 0);
 }
 
 int set(int x, int y, int val) {
@@ -63,7 +66,6 @@ int go(int x, int y) {
 	// 可以到达，回退到分岔状态
 	if (x == bx && y == by) {
 		set(x, y, CAN);
-		printf("Arrive %d\n", ++arrive_c);
 		return 1;
 	}
 

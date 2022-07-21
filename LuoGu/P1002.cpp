@@ -4,13 +4,17 @@
  * Description:
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
+#include <iostream>
+#include <cmath>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <array>
 
-#define CAN 1
-#define NO 0
+const int CAN = 1;
+const int NO = 0;
+
+using namespace std;
 
 int bx, by, mx, my;
 long long map[25][25];
@@ -19,7 +23,7 @@ int set(int x, int y, int val);
 long long get(int x, int y);
 
 int main(){
-    scanf("%d%d%d%d", &bx, &by, &mx, &my);
+	cin >> bx >> by >> mx >> my;
 
 	for (int i = 0; i <= bx; i++) {
 		for (int j = 0; j <= by; j++) {
@@ -46,7 +50,7 @@ int main(){
 		}
 	}
 
-	printf("%lld\n", map[bx][by]);
+	cout << map[bx][by];
 
     return 0;
 } 
