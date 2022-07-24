@@ -14,6 +14,8 @@
 #include <string>
 #include <algorithm>
 
+#warning "This is not a valid program"
+
 using namespace std;
 
 void quick_sort(vector<char *> &nums, int l, int r) {
