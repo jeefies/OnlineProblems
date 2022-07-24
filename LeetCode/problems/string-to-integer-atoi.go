@@ -20,12 +20,15 @@ func myAtoi(s string) int {
 
 	isNeg := false
 	x, i := 0, 0
+	
+	// Ignore all space (as s.lstrip in python)
 	for i = range s {
 		if s[i] == ' ' {
 			continue
 		}
 		break
 	}
+	
 	switch s[i] {
 	case '-':
 		isNeg = true
@@ -33,6 +36,7 @@ func myAtoi(s string) int {
 	case '+':
 		i++
 	}
+
 	for ;i < len(s);i++ {
 		if '0' <= s[i] && s[i] <= '9' {
 			x = x * 10 + int(s[i] - '0')
@@ -42,7 +46,8 @@ func myAtoi(s string) int {
 
 		if x > MAXN {
 			if isNeg {
-				return -MAXN - 1
+				// use ^MAXN instead of -MAXN - 1 can save a tiny time
+				return ^MAXN
 			} else {
 				return MAXN
 			}

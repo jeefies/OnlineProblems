@@ -2,6 +2,7 @@
  * Author: Jeefy Fu
  * Email: jeefy163@163.com
  * Description:
+ *  	Origin URL: http://noi.openjudge.cn/ch0108/02/
  */
 
 #include <stdlib.h>
