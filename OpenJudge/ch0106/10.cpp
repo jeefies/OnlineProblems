@@ -2,8 +2,8 @@
  * Author: Jeefy Fu
  * Email: jeefy163@163.com
  * Description:
+ * 		Origin URL : http://noi.openjudge.cn/ch0106/10/
  */
-
 #include <iostream>
 #include <cmath>
 #include <fstream>
@@ -11,7 +11,8 @@
 #include <vector>
 #include <array>
 #include <string>
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <cstring>
 
 using namespace std;
 
@@ -24,8 +25,8 @@ int main() {
 		temps = as;
 		as = bs;
 		bs = temps;
-		cout << "as:" << as << endl;
-		cout << "bs:" << bs << endl;
+		// cout << "as:" << as << endl;
+		// cout << "bs:" << bs << endl;
 	}
 
 	int minl, restl;
@@ -58,7 +59,10 @@ int main() {
 	reverse(rs.begin(), rs.end());
 	while (rs.length() > 1 && rs[i] == '0')
 		i++;
+	int is0 = 1;
 	for (; i < rs.length(); i++) {
+		is0 = 0;
 		putchar(rs.at(i));
 	}
+	if (is0) putchar('0');
 }
