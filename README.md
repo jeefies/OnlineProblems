@@ -1,7 +1,7 @@
 # luogu-solutions
 
 ### 介绍
-各个上刷题的代码，在OpenJudge中使用GCC(由于未知原因，有些需要处理字符串的题只能用C++才能运行起来T^T)  
+各个上刷题的代码，在OpenJudge中使用大多数选择使用C++(主要是C有些时候确实很麻烦)
 在LuoGu中使用C++  
 在LeetCode中使用Golang
 
