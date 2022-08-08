@@ -4,6 +4,7 @@
 各个上刷题的代码，在OpenJudge中使用大多数选择使用C++(主要是C有些时候确实很麻烦)
 在LuoGu中使用C++  
 在LeetCode中使用Golang
+还有我在CodinGame上玩耍写的一些代码，多为C
 
 ### Luogu
 存放在[洛谷](www.luogu.com.cn/problem/list)上所作的题
@@ -13,3 +14,6 @@
 
 ### LeetCode
 在[LeetCode/problems](https://leetcode.cn/problemset/all/)目录下，会存放我在LeetCode上刷题的源代码
+
+### CodinGame
+在[CodinGame](https://www.codingame.com/)上玩耍的题
