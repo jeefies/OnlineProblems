@@ -33,3 +33,5 @@
 
 *.swo
 *.swp
+*.in
+*.out
