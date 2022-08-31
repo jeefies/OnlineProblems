@@ -1,64 +1,67 @@
-#include <iostream>
+#include <stdio.h>
 
 int N;
-double D, GD, C;
+double D, oilD, maxOil;
 double distance[8] = {0.0};
 double cost[8] = {0.0}; 
 
 double search() {
-	double maxR = C * GD;
+	double maxR = maxOil * oilD;
+
 	int cs = 0; // current step
 	double cd = 0.0; // current distance
-	double cg = 0.0; // current gas count
+	double co = 0.0; // current oil count
 	double money = 0.0; // need money
+
 	while (cd != D) {
-		double canReach = cd + maxR;
-		int dsti = -1;
-		int i;
-		for (i = cs + 1; i <= N && distance[i] <= canReach; i++) {
-			if (cost[i] <= cost[cs]) {
-				dsti = i;
-				break;
-			}
-		}
-		
-		if (distance[cs + 1] > canReach) {
+		// judge can reach to next or not
+		if (cd + maxR < distance[cs + 1]) {
 			return -1;
 		}
-		
-		if (dsti == -1) {
-			// no cheaper stations after
-			if (cd + maxR >= D) {
-				// can reach to destination directly
-				money += ((D - cd) / GD - cg) * cost[cs];
+
+		// dst step
+		int s;
+		for (s = cs + 1; s <= N + 1; s++) {
+			// cost[N + 1] must be 0
+			if (cost[s] <= cost[cs]) {
 				break;
 			}
-			// can not reach to end
-			dsti = i - 1;
-			// so fill box
-			money += cost[cs] * (C - cg);
-			cg = C - (distance[dsti] - cd) / GD;
-		} else {
-			// use all gas to to station
-			money += cost[cs] * ((distance[dsti] - cd) / GD - cg);
-			cg = 0;
+
+			if (cd + maxR < distance[s + 1]) {
+				break;
+			}
 		}
-		cd = distance[dsti];
+
+		// need reach to s
+		cd = distance[s];
+		// no need to be full
+		if (cost[s] <= cost[cs]) {
+			double needOil = (distance[s] - distance[cs]) / oilD - co;
+			money += needOil * cost[cs];
+			co = 0;
+		} else {
+			// need to fill to full
+			money += (maxOil - co) * cost[cs];
+			double needOil = (distance[s] - distance[cs]) / oilD;
+			co = maxOil - needOil;
+		}
+		cs = s;
+		cd = distance[s];
 	}
 	return money;
 }
 
 int main() {
-	scanf("%lf%lf%lf%lf%d", &D, &C, &GD, cost, &N);
+	scanf("%lf%lf%lf%lf%d", &D, &maxOil, &oilD, &cost[0], &N);
 	
-	for (int i = 1; i < N; i++) {
-		scanf("%lf%lf", distance + 1, cost + 1);
+	for (int i = 1; i <= N; i++) {
+		scanf("%lf%lf", distance + i, cost + i);
 	}
 	distance[N + 1] = D;
 	
 	double money = search();
 	
-	if (money == -1) std::cout << "No Solution";
+	if (money == -1) printf("No Solution");
 	else printf("%.2lf", money);
 	return 0;
 }
