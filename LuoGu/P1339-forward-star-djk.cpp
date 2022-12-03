@@ -12,7 +12,7 @@ struct Edge {
 
 const int N = 2501, INF = 0x3F3F3F3F;
 int n, m, s, t;
-// forward star list� (this has no english name, because it's "fucked" by chinese IOers)
+// 向前星 (this has no english name, because it's "fucked" by chinese IOers)
 int head[N], size = 0;
 struct Edge edge[N * 5];
 

@@ -66,10 +66,12 @@ int main() {
 		}
 	}
 	
-	for (int i = 1; i <= n; i++) add(n + 1, i, 0);
+	for (int i = 1; i <= n; i++) add(0, i, 0);
+	
+	// printf("Graph set!\n");
 	
 	static int dis[N]; memset(dis, 0x7F, sizeof(dis));
-	if (spfa(n + 1, dis)) printf("Yes");
+	if (spfa(0, dis)) printf("Yes");
 	else printf("No");
 	return 0;
 }
