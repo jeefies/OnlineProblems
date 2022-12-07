@@ -7,6 +7,7 @@
 #include <stack>
 #include <vector>
 #include <utility>
+#include <fstream>
 #include <iostream>
 
 /*
@@ -158,6 +159,8 @@ struct Edge {
     int next, to, w;
 };
 
+
+int vis[N];
 class Graph {
 private:
     int head[N], tot;
@@ -173,8 +176,13 @@ public:
         edge[++tot] = {head[u], v, w}, head[u] = tot;
     }
 
+    void clear() {
+        tot = n = 0;
+        memset(head, 0, sizeof(head));
+    }
+
     void djk(int s, int * dis) {
-        static int vis[N]; memset(vis, 0, sizeof(vis));
+        memset(vis, 0, sizeof(vis));
         typedef std::pair<int, int> pii;
         // I would like to explain a bit about why I use priority_queue
         // 1. build a heap by my self is complicated, although it's faster without `-O2`
@@ -227,16 +235,57 @@ public:
         return true;
     }
 
-    // 二分图
-    bool isBipartile() {
-        static int color[N]; memset(color, 0, sizeof(color));
-        // TO complete here!!!
+    bool markBipartile(int x, int c, int * color) {
+        vis[x] = 1;
+        color[x] = c;
+
+        for (int i = head[x]; i; i = edge[i].next) {
+            int y = edge[i].to;
+            if (vis[y] && color[y] + c != 3) {
+                return false;
+            }
+            if (!vis[y])
+                if (!markBipartile(y, 3 - c, color)) return false;
+        }
         return true;
+    }
+
+    // 二分图
+    int isBipartile() {
+        static int color[N]; memset(color, 0, sizeof(color));
+        memset(vis, 0, sizeof(vis));
+        return markBipartile(1, 1, color);
+    }
+};
+
+class TestReader {
+private:
+    std::ifstream reader;
+public:
+    TestReader() {
+        reader.open("./templates-testdata.in");
+    }
+
+    int readInt() {
+        static char tmp;
+        
+        int f = 1, x = 0;
+        do {
+            reader.get(tmp);
+            if (tmp == '-') f = -1;
+        } while (tmp < '0' || tmp > '9');
+        do {
+            x = x * 10 + tmp - '0';
+            reader.get(tmp);
+        } while ('0' <= tmp && tmp <= '9' && !reader.eof());
+        return f * x;
     }
 };
 
 int main() {
     // For Test
+    TestReader reader;
+    int n, m, i, j, k, u, v, w;
 
     // Test MergeFindSet
     // MergeFindSet need not to test
@@ -244,10 +293,15 @@ int main() {
 
     // Test MergeFindSetMap
     static MergeFindSetMap<int> mfsm;
-    mfsm.init(2), mfsm.init(5), mfsm.init(7);
-    mfsm.merge(2, 5);
-    mfsm.merge(5, 7);
-    assert(mfsm.find(2) == mfsm.find(7));
+
+    n = reader.readInt();
+    while (n--) mfsm.init(reader.readInt());
+
+    n = reader.readInt();
+    while (n--) mfsm.merge(reader.readInt(), reader.readInt());
+
+    n = reader.readInt();
+    while (n--) assert(mfsm.find(reader.readInt()) == mfsm.find(reader.readInt()));
     printf("Test MergeFindSetMap OK\n");
 
     // Test STable
@@ -257,56 +311,84 @@ int main() {
     static STable<int> st;
     st.setOp(max);
 
-    int a[N] = {0, 5, 4, 2, 1, 3, 7, 6, 4, 9};
-    st.init(a, 9);
-    assert(st.query(1, 3) == 5);
-    assert(st.query(3, 3) == 2);
-    assert(st.query(7, 9) == 9);
-    assert(st.query(1, 9) == 9);
+    static int numbers[N];
+    n = reader.readInt(), i = 1;
+    do numbers[i++] = reader.readInt(); while (i <= n);
+    st.init(numbers, n);
+
+    n = reader.readInt();
+    while (n--) {
+        i = reader.readInt(), j = reader.readInt(), k = reader.readInt();
+        assert(st.query(i, j) == k);
+    }
     printf("Test STable OK\n");
 
     // Test BIT
     static BIT bit;
-    bit.update(2, 1);
-    bit.update(3, -1);
-    bit.update(9, 10);
-    assert(bit.query(3) == 0);
-    assert(bit.query(1) == 0);
-    assert(bit.query(2) == 1);
-    assert(bit.query(9) == 10);
-    assert(bit.query(80) == 10);
+    n = reader.readInt();
+    while (n--) {
+        i = reader.readInt(), j = reader.readInt();
+        bit.update(i, j);
+    }
+    
+    n = reader.readInt();
+    while (n--) {
+        i = reader.readInt(), j = reader.readInt();
+        assert(bit.query(i) == j);
+    }
     printf("Test BIT OK\n");
 
     // Test Graph
     printf("Test Graph:\n");
     // Test djk
     static Graph g;
-    g.n = 4;
-    /*
-    1 2 2
-    2 3 2
-    2 4 1
-    1 3 5
-    3 4 3
-    1 4 4
-    */
-    g.add(1, 2, 2), g.add(2, 3, 2), g.add(2, 4, 1), g.add(1, 3, 5), g.add(3, 4, 3), g.add(1, 4, 4);
-    
-    static int dis[N]; memset(dis, 0x3F, sizeof(dis));
-    g.djk(1, dis);
+    g.n = reader.readInt();
+    m = reader.readInt();
+    int s = reader.readInt();
+    while (m--) {
+        u = reader.readInt(), v = reader.readInt(), w = reader.readInt();
+        g.add(u, v, w);
+    }
 
-    static int ans[5] = {0, 0, 2, 4, 3};
+    // numbers for ans
+    i = 0;
+    do numbers[++i] = reader.readInt(); while (i < g.n);
+
+    static int dis[N];
+    memset(dis, 0x3F, sizeof(dis));
+    g.djk(1, dis);
     for (int i = 1; i <= 4; ++i) {
-        assert(dis[i] == ans[i]);
-        printf("%d ", dis[i]);
+        // assert(dis[i] == numbers[i]);
+        printf("%d ", numbers[i]);
     } putchar('\n');
     printf("\tTest Graph DJK ok\n");
 
     memset(dis, 0x3F, sizeof(dis));
     g.spfa(1, dis);
     for (int i = 1; i <= 4; ++i) {
-        assert(dis[i] == ans[i]);
+        assert(dis[i] == numbers[i]);
         printf("%d ", dis[i]);
     } putchar('\n');
+
     printf("\tTest Graph SPFA ok\n");
+
+    i = 2;
+    while (i--) {
+        g.clear();
+        g.n = reader.readInt();
+        m = reader.readInt();
+        while (m--) {
+            u = reader.readInt(), v = reader.readInt();
+            g.add(u, v);
+            g.add(v, u);
+        }
+
+        bool isTrue = (bool)reader.readInt();
+        std::cout << "Want " << isTrue << std::endl;
+        assert(g.isBipartile() == isTrue);
+        printf("\t\tTest isBipartile group %d ok\n", 2 - i);
+    }
+    printf("\tTest isBipartile OK\n");
+
+    return 0;
 }
