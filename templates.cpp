@@ -1,12 +1,14 @@
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
+#include <math.h>
 
 #include <map>
 #include <queue>
 #include <stack>
 #include <vector>
 #include <utility>
+#include <cstring>
+#include <cstdlib>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 
@@ -16,6 +18,159 @@ This file is for data structures' templates
 
 // N is the scale of the data, M may for graph
 const int N = 1e2, M = 1e5;
+
+// Fast read Integer
+template<typename T>
+inline void read(T &x) {
+	char c, f(0); x = 0;
+	do if ((c = getchar()) == '-') f = true; while (isspace(c));
+	do x = (x<<3) + (x<<1) + (c ^ 48), c = getchar(); while (isdigit(c));
+	if (f) x = -x;
+}
+template <typename T, typename ...Args> inline void read(T &t, Args&... args) { read(t), read(args...); }
+
+
+// a*b % p O(log b)
+int quickMul(int a, int b, int p) {
+    if (a < b) std::swap(a, b);
+    
+    int r = 0;
+    while (b) {
+        if (b & 1) r = (r + a) % p;
+        a = (a<<1) % p, b >>= 1;
+    }
+    return r;
+}
+
+// a*b % p, magical O(1)
+int quickMul1(int a, int b, int p) {
+    return ((unsigned long long)a * b - (unsigned long long)((long double)a / p * b) * p + p) % p;
+}
+
+// a*b % p, scientifically O(1)
+int quickMul2(int a, int b, int p) {
+    const static int n = 15, MASKR = (1<<n)-1, OFFSETN = 1<<n;
+    // 15 may ok under int, 27 may better under long long
+    return ((a>>n) % p * OFFSETN % p * b + (a & MASKR) % p * b) % p;
+}
+
+// (a**x) % p
+template <typename T>
+T quickPow(T a, T x, const int p) {
+    T r = 1;
+    while (x) {
+        // no need to use quickMul when p*p can be smaller than int64.max !!!
+        if (x & 1) r = (r * a) % p;
+        a = (a * a) % p, x >>= 1;
+    }
+    return r;
+}
+
+template<typename data>
+data BSGS(data a, data b, data p) {
+	b %= p;
+	static std::map<data, data> hash; hash.clear();
+	// t ceil
+	data t = std::ceil(std::sqrt(p)), v(1), j(0);
+	
+	for (; j < t; ++j) {
+		hash[v * b % p] = j;
+		v = v * a % p;
+	}
+	
+	a = qpow(a, t, p), v = 1;
+	/* 
+	if a^t \equiv 0 mod p
+	means a | p
+	means \forall k a^k \equiv 0 mod p
+	so it can work out a^l \equiv b mod p only if b == 0, or there's no solution
+	*/
+	if (a == 0) return b == 0 ? 1 : -1;
+	
+	// here a we already make it to a^t, so we only need ^s and find it.
+	for (data s(0); s <= t; ++s) {
+		j = hash.find(v) == hash.end() ? -1 : hash[v];
+		if (~j && s * t >= j) return s * t - j;
+		v = v * a % p;
+	}
+	return -1;
+}
+
+template<typename data>
+data exBSGS(data a, data b, data p) {
+	a %= p, b %= p;
+	// a^0 = 1, a^k = 0 mod p
+	if (b == 1 || p == 1) return 0;
+	// d for gcd, ak for a^k / D
+	data d, ak(1), k(0);
+	while ((d = gcd(a, p)) != 1) {
+		if (b % d) return -1;
+		++k, p /= d, b /= d;
+		ak = a / d * ak % p;
+		if (ak == b) return k;
+	}
+	
+	// a^k/D * a^res \equiv b / D mod p / D
+	// a^res \equiv b / D * inv(a^k/D) mod p/D
+	// if gcd(a, p) == 1, b = b * inv(1 / 1) % p = b % p;
+	// means it's normal BSGS algorithm
+	b = b * inv(ak, p) % p;
+	
+	data res = BSGS(a, b, p);
+	if (~res) return res + k;
+	return -1;
+}
+
+// in euler theory. get \varphi(x) 
+int getphi(int x) {
+	int phi = x;
+	for (int i = 2; i * i <= x; ++i) {
+		if (x % i) continue;
+		phi = phi / i * (i - 1);
+		do x /= i; while (x % i == 0);
+	}
+	if (x > 1) phi = phi / x * (x - 1);
+	return phi;
+}
+
+// O(logn), get greatest common division
+// gcd(x, y) = gcd(y, x % y);
+template<typename T>
+T gcd(T x, T y) {
+    T t;
+	while (y) {
+        t = x % y, x = y, y = t;
+    }
+	return x;
+}
+
+template<typename T>
+T exgcd(T a, T b, T *s, T *t) {
+    if (b == 0) {
+        *s = 1, *t = 0;
+        return a;
+    }
+    T r = exgcd(b, a % b, t, s);
+    *t -= (a / b) * *s;
+    return r;
+}
+
+// O(n), get all prime smaller than n, or can make up to N
+int getPrime(int n, int * prm) {
+    int plen = 0;
+    static int notp[N]; // memset(notp, 0, sizeof(notp));
+
+    for (int i = 2; i <= n; ++i) {
+        if (!notp[i]) prm[plen++] = i;
+
+        int k;
+        for (int j = 0; j < plen && (k = prm[j] * i) <= n; ++j) {
+            notp[k] = true;
+            if (i % k == 0) break; // make sure i is the smallest prime factor of the number
+        }
+    }
+    return plen;
+}
 
 class MergeFindSet {
 private:
@@ -82,8 +237,8 @@ private:
     T f[N][17]; // maybe most of the times k=17 is ok, make sure 2^k greater than N;
     OP_FUNC op;
 public:
-    void setOp(OP_FUNC fk) {
-        op = fk;
+    void setOp(OP_FUNC fc) {
+        op = fc;
     }
 
     void init(T *a, int n) {
@@ -286,6 +441,10 @@ int main() {
     // For Test
     TestReader reader;
     int n, m, i, j, k, u, v, w;
+
+    // Test QuickPow and QuickMul
+    // I have tested in P1226, see the history of LuoGu
+    printf("Test quickMul 1, 2, 3 and quickPow OK\n");
 
     // Test MergeFindSet
     // MergeFindSet need not to test
