@@ -55,15 +55,15 @@ int quickMul2(int a, int b, int p) {
 }
 
 // (a**x) % p
-template <typename T>
-T quickPow(T a, T x, const int p) {
-    T r = 1;
-    while (x) {
-        // no need to use quickMul when p*p can be smaller than int64.max !!!
-        if (x & 1) r = (r * a) % p;
-        a = (a * a) % p, x >>= 1;
-    }
-    return r;
+template<typename T, typename X, typename P>
+T qpow(T a, X x, P p) {
+	a %= p;
+	T r(1);
+	while (x) {
+		if (x & 1) r = (long long)r * a % p;
+		a = (long long)a * a % p, x >>= 1;
+	}
+	return r;
 }
 
 template<typename data>

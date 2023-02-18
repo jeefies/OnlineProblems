@@ -41,12 +41,16 @@ inline void merge(ll & a1, ll & m1) {
 	
 	ll c = (a2 - a1) % m2;
 	if (c < 0) c += m2;
+
+	printf("C %lld\n", c);
 	
 	ll d = gcd(m1, m2), s, t;
 	exgcd(m1 / d, m2 / d, s, t);
 	// get right solution to $s m_1 + t _m2 = c$
 	s = mul(s, c / d, m2);
 	if (s < 0) s += m2;
+
+	printf("K1 %lld\n", s);
 	
 	ll lcm = m1 / d * m2;
 	
@@ -64,6 +68,7 @@ int main() {
 	
 	for (int i = 1; i < n; ++i) {
 		merge(a1, m1);
+		printf("to {%lld, %lld}\n", a1, m1);
 	}
 	
 	printf("%lld\n", a1);
