@@ -45,18 +45,27 @@ public:
 		}
 	}
 	
-	void work(int t, int * dis) {
-		priority_queu<RNode> q; q.push({1, 0});
+	int work(int t, double * dis) {
+		priority_queue<RNode> q; q.push({1, dis[1]});
 		
 		// TODO !!!
 		int cnt = 0;
 		while (q.size()) {
 			auto x = q.top(); q.pop();
+//			cout << "Q top " << x.x << " " << x.c << '\n';
 			if (x.x == t) {
+//				cout << "!! In Target: " << x.c << '\n';
 				if (x.c > E + 1e-10) return cnt;
 				else ++cnt;
+				E -= x.c;
+			}
+
+			for (auto e : G[x.x]) {
+				q.push({e.to, x.c - dis[x.x] + e.w + dis[e.to]});
+//				cout << "\tQ push " << e.to << ' ' << x.c - dis[x.x] + e.w + dis[e.to] << '\n';
 			}
 		}
+		return -1;
 	}
 } rg, g;
 
@@ -75,7 +84,7 @@ int main() {
 	rg.djk(n, rest);
 	
 	for (int i = 1; i <= n; ++i) {
-		cout << "Node " << i << " Min dis = " << rest[i] << '\n';
+//		cout << "Node " << i << " Min dis = " << rest[i] << '\n';
 	}
 	
 	cout << g.work(n, rest) << '\n';
