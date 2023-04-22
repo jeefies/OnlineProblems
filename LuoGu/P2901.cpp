@@ -7,12 +7,11 @@ using namespace std;
 const int N = 5e3 + 3;
 
 int n, m;
-double E;
-double rest[N];
+int rest[N];
 
 struct RNode {
 	int x;
-	double c;
+	int c;
 	bool operator < (const RNode &r) const {
 		return c > r.c;
 	}
@@ -22,15 +21,15 @@ class Graph {
 private:
 	struct Edge {
 		int to;
-		double w;
+		int w;
 	};
 	vector<Edge> G[N];
 public:
-	inline void add(int u, int v, double w) {
+	inline void add(int u, int v, int w) {
 		G[u].push_back({v, w});
 	}
 	
-	void djk(int s, double * dis) {
+	void djk(int s, int * dis) {
 		vector<bool> vis(n + 1);
 		priority_queue<RNode> q; q.push({s, 0});
 		
@@ -45,8 +44,8 @@ public:
 		}
 	}
 	
-	int work(int t, double * dis) {
-		priority_queue<RNode> q; q.push({1, dis[1]});
+	int work(int s, int t, int k, int * dis, vector<int> &res) {
+		priority_queue<RNode> q; q.push({s, dis[s]});
 		
 		// TODO !!!
 		int cnt = 0;
@@ -54,12 +53,9 @@ public:
 			auto x = q.top(); q.pop();
 			// cout << "Q top " << x.x << " " << x.c << '\n';
 			if (x.x == t) {
-				// cout << "!! In Target: " << x.c << '\n';
-				if (x.c > E + 1e-10) return cnt;
-				else ++cnt;
-				E -= x.c;
-				continue;
-			}
+                res.push_back(x.c);
+                if (++cnt == k) break;
+            }
 
 			for (auto e : G[x.x]) {
 				q.push({e.to, x.c - dis[x.x] + e.w + dis[e.to]});
@@ -73,21 +69,26 @@ public:
 int main() {
 	cin.tie(0)->sync_with_stdio(false);
 	
-	cin >> n >> m >> E;
+    int k;
+	cin >> n >> m >> k;
 	
-	for (int s, t, i = 1; i <= m; ++i) {
-		double e; cin >> s >> t >> e;
+	for (int s, t, e, i = 1; i <= m; ++i) {
+		cin >> s >> t >> e;
 		g.add(s, t, e);
 		rg.add(t, s, e);
 	}
 	
 	fill(rest, rest + n + 1, 2e9);
-	rg.djk(n, rest);
+	rg.djk(1, rest);
 	
 	for (int i = 1; i <= n; ++i) {
 		// cout << "Node " << i << " Min dis = " << rest[i] << '\n';
 	}
 	
-	cout << g.work(n, rest) << '\n';
+    vector<int> res;
+	g.work(n, 1, k, rest, res);
+    for (int i = 0; i < k; ++i) {
+        cout << (i < res.size() ? res[i] : -1) << '\n';
+    }
 	return 0;
 }
