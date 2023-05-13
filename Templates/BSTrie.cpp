@@ -84,7 +84,6 @@ public:
 }; 
 BSTrie<> bst;
 
-/*
 int main() {
 	cin.tie(0)->sync_with_stdio(false);
 	
@@ -103,9 +102,8 @@ int main() {
 		}
 	}
 }
-*/
 
-int main() {
+/*int main() {
 	cin.tie(0)->sync_with_stdio(false);
 	
 	int s, n, last = 0, ans = 0;
@@ -126,4 +124,4 @@ int main() {
 			default: clog << "Error!\n";
 		}
 	} cout << ans << '\n';
-}
+}*/
