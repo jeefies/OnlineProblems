@@ -2,14 +2,18 @@
 #include <algorithm>
 #include <vector>
 
+// Why Error at point 30?
+// But OFFSET?????? FUCK YOU!
 using namespace std;
-const int N = 4e5 + 3, BLOCK = 2048;
+const int N = 1e6 + 3, BLOCK = 2048;
 
 int lab[N];
 struct Ques {
 	int l, r, i, t;
 	bool operator < (const Ques &q) {
-		return (lab[l] ^ lab[q.l]) ? (l < q.l) : ((lab[r] ^ lab[q.r]) ? r < q.r : t < q.t);
+		if (lab[l] != lab[q.l]) return l < q.l;
+		else if (lab[r] != lab[q.r]) return r < q.r;
+		return t < q.t;
 	}
 } qs[N];
 
@@ -21,16 +25,16 @@ int num[N];
 int apps[N], tot = 0;
 
 // but but
-int exi[N] = {1000000000};
-int but[N];
+int exi[N];
+int but[N] = {N};
 inline void add(int v) {
 	int &e = exi[v];
-	--but[e], ++but[++e];
+	--but[e + 100], ++but[++e + 100];
 }
 
 inline void del(int v) {
 	int &e = exi[v];
-	--but[e], ++but[--e];
+	--but[e + 100], ++but[--e + 100];
 }
 
 inline void fix(int l, int r, int t) {
@@ -42,8 +46,8 @@ inline void fix(int l, int r, int t) {
 }
 
 inline int QBut() {
-	for (int k = 1; ; ++k)
-		if (!but[k]) return k;
+	for (int k = 1 + 100; k <= 600; ++k)
+		if (but[k] == 0) return k - 100;
 	return -1; // NOT REACHED
 }
 
@@ -53,13 +57,13 @@ int main() {
 	
 	int n, q;
 	cin >> n >> q;
+	for (int i = 1; i <= (n << 1); ++i) lab[i] = i / BLOCK;
 	
 	for (int i = 1; i <= n; ++i) {
 		cin >> num[i];
-		apps[tot++] = num[i];
+		apps[++tot] = num[i];
 	}
 	
-	for (int i = 1; i < N; ++i) lab[i] = i / BLOCK;
 	
 	int mc = 0, qc = 0;
 	for (int op, x, y, i = 1; i <= q; ++i) {
@@ -68,17 +72,17 @@ int main() {
 			++qc, qs[qc] = {x, y, qc, mc};
 		} else {
 			++mc, ms[mc] = {x, y};
-			apps[tot++] = y;
+			apps[++tot] = y;
 		}
 	} sort(qs + 1, qs + 1 + qc);
 	
 	// discrete
-	sort(apps, apps + tot);
-	int * ae = unique(apps, apps + tot);
+	sort(apps + 1, apps + tot + 1);
+	int * ae = unique(apps + 1, apps + tot + 1);
 	for (int i = 1; i <= n; ++i)
-		num[i] = lower_bound(apps, ae, num[i]) - apps + 1;
+		num[i] = lower_bound(apps + 1, ae, num[i]) - apps + 1;
 	for (int i = 1; i <= mc; ++i)
-		ms[mc].v = lower_bound(apps, ae, ms[mc].v) - apps + 1;
+		ms[i].v = lower_bound(apps + 1, ae, ms[i].v) - apps + 1;
 	
 	/*
 	clog << "Discrete result:\nnums to: ";
@@ -90,16 +94,16 @@ int main() {
 	} clog << '\n';
 	*/
 		
-	int l = 1, r = 0, t = 0;
+	int l = 0, r = 0, t = 0;
 	for (int i = 1; i <= qc; ++i) {
 		// clog << "At q " << i << '\n';
 		Ques &q = qs[i];
+		while (l > q.l) add(num[--l]);
+		while (l < q.l) del(num[l++]);
 		while (r < q.r) add(num[++r]);
 		while (r > q.r) del(num[r--]);
-		while (l < q.l) del(num[l++]);
-		while (l > q.l) add(num[--l]);
 		while (t < q.t) fix(l, r, ++t);
-		while (t > q.t) fix(l, r, t--);
+		while (t > q.t) fix(l, r, t--);	
 		
 		res[q.i] = QBut();
 	}
