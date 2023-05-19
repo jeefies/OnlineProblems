@@ -5,7 +5,7 @@
 
 using namespace std;
 const int mod = 998244353, g = 3, ig = 332748118;
-const int N = 1e6;
+const int N = 5e5;
 typedef long long lint;
 typedef vector<lint> poly;
 
@@ -82,12 +82,12 @@ void polyMul(poly &A, const poly &B, int n) {
 	copy_n(tmpA.begin(), n, A.begin());
 }
 
+poly C(N), tmp(N);
 void polyInv(poly &A, poly &ret, int n) {
 	int O = 1;
 	while (O < n * 2) O <<= 1; 
 	ret.assign(O, 0);
 	
-	poly C(O), tmp(O);
 	ret[0] = qpow(A[0], mod - 2);
 	for (int p = 2, lp = 2; p < n * 2; p <<= 1, ++lp) {
 		for (int i = 0; i < p; ++i)
@@ -117,6 +117,7 @@ void polyInvDer(poly &A, poly &ret, int n) {
 void polyLn(poly &A, poly &ret, int n) {
 	int O = 1;
 	while (O < n * 2) O <<= 1;
+	clog << "O: " << O << '\n';
 	
 	poly der(O), inv(O);
 	polyDer(A, der, n);
@@ -132,130 +133,48 @@ void polyLn(poly &A, poly &ret, int n) {
 void polyExp(poly &A, poly &ret, int n) {
 	int O = 1;
 	while (O < n * 2) O <<= 1;
+	clog << "exp O: " << O << '\n';
 	
 	ret[0] = 1;
 	poly ln(O), tA(O);
 	for (int p = 2, lp = 2; p < n * 2; p <<= 1, ++lp) {
+		clog << "At p: " << p << '\n';
 		polyLn(ret, ln, p);
+		log("poly ln to: ", ln, p);
 		for (int i = 0; i < p; ++i) tA[i] = A[i];
 		NTT(ret, p << 1, 1), NTT(ln, p << 1, 1), NTT(tA, p << 1, 1);
 		for (int i = 0; i < (p << 1); ++i)
 			ret[i] = ret[i] * ((1 + mod - ln[i] + tA[i]) % mod) % mod;
 		NTT(ret, p << 1, -1), fill_n(ret.begin() + p, p, 0);
+		log("final exp is: ", ret, p);
 	}
 }
 
-inline lint C(int n, int m) {
-	if (n < m) return 0;
-	return fac[n] * ifac[m] % mod * ifac[n - m] % mod;
-}
-
-int n, m;
-inline void calc1() {
-	cout << qpow(m, n) << '\n';
-}
-
-inline void calc2() {
-	lint res = 1;
-	for (int i = 0; i < n; ++i)
-		res = res * (m - i) % mod;
-	cout << res << '\n';
-	 
-	// if (n > m) {
-	//	cout << "0" << '\n';
-	//	return;
-	// }
-	// cout << fac[m] * ifac[m - n] << '\n';
-}
-
-inline void calc3() {
-	lint ans = 0;
-	for (int i = 1; i <= m; ++i) {
-		ans += ((m - i) & 1 ? mod - 1 : 1) * C(m, i) % mod * qpow(i, n) % mod;
-		ans %= mod;
-	}
-	cout << (ans + mod) % mod << '\n';
-}
-
-poly SA(N), SB(N), S(N);
-inline void calc4() {
-	int O = 1;
-	while (O <= m * 2) O <<= 1;
-	// A(x) = sum i in [0, m] i^n/i! * x^i
-	// B(x) = sum i in [0, m] (-1)^i / (i)! * x^i
-	for (int i = 0; i <= m; ++i) {
-		SA[i] = qpow(i, n) * ifac[i] % mod;
-		SB[i] = i & 1 ? mod - ifac[i] : ifac[i];
-	}
-	NTT(SA, O, 1);
-	NTT(SB, O, 1);
-	
-	for (int i = 0; i < O; ++i) {
-		S[i] = SA[i] * SB[i] % mod; 
-	} NTT(S, O, -1);
-	
-	lint sum = 0;
-	for (int i = 1; i <= m; ++i) {
-		sum = (sum + S[i]) % mod;
-	} cout << sum << '\n';
-}
-
-inline void calc5() {
-	cout << ((n > m) ? "0" : "1") << '\n';
-}
-
-inline void calc6() {
-	// S(n, m)
-	cout << S[m] << '\n';
-}
-
-inline void calc7() {
-	cout << C(n + m - 1, m - 1) << '\n';
-}
-
-inline void calc8() {
-	cout << C(m, n) << '\n';
-}
-
-inline void calc9() {
-	cout << C(n - 1, m - 1) << '\n';
-}
-
+int cnt[N];
 poly A(N), expA(N);
-inline void calc10() {
-	for (int i = 1; i <= m; ++i) {
-		for (int j = i; j <= n; j += i)
-			A[j] = (A[j] + invx[j / i] % mod) % mod;
-	} polyExp(A, expA, n + 1);
-	cout << expA[n] << '\n';
-}
-
-inline void calc11() {
-	cout << (n <= m ? 1 : 0) << '\n';
-}
-
-inline void calc12() {
-	cout << (n >= m ? expA[n - m] : 0) << '\n';
-}
-
 int main() {
 	cin.tie(0)->sync_with_stdio(false);
 	
-//	n = 13, m = 6;
+	int n, m;
 	cin >> n >> m;
-	prepare(N - 1);
+	prepare(m << 2);
 	
-	calc1();
-	calc2();
-	calc3();
-	calc4();
-	calc5();
-	calc6();
-	calc7();
-	calc8();
-	calc9();
-	calc10();
-	calc11();
-	calc12();
-	return 0;
+	A.assign(m + 1, 0);
+	for (int v, i = 0; i < n; ++i) {
+		cin >> v; ++cnt[v];
+	}
+	
+	for (int i = 1; i <= m; ++i) {
+		if (!cnt[i]) continue;
+		for (int j = i; j <= m; j += i)
+			// i * invx[j] == i/j ==> 1/k
+			A[j] = (A[j] + i * invx[j] % mod * cnt[i]) % mod;
+	}
+	
+	for (int i = 0; i <= m; ++i) {
+		clog << A[i] << ' ';
+	}  clog << '\n';
+	
+	polyExp(A, expA, m + 2);
+	for (int i = 1; i <= m; ++i) cout << expA[i] << '\n';
 }
