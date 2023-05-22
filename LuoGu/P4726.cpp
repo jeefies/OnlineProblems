@@ -10,7 +10,6 @@ typedef long long lint;
 typedef vector<lint> poly;
 
 void log(const string &s, const poly &p, int n) {
-	return;
 	clog << s << '\n';
 	for (int i = 0; i < n; ++i) clog << p[i] << ' ';
 	clog << '\n';

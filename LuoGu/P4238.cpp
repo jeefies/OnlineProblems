@@ -20,7 +20,7 @@ void NTT(vec &v, int O, int inv) {
 	clog << "In NTT, transforming: ";
 	for (int i = 0; i < O; ++i) {
 		if (i < rev[i]) swap(v[i], v[rev[i]]);
-		// clog << v[i] << ' ';
+		clog << v[i] << ' ';
 	} clog << '\n';
 	
 	for (int u = 2; u <= O; u <<= 1) {
@@ -40,7 +40,10 @@ void NTT(vec &v, int O, int inv) {
 		for (int i = 0; i < O; ++i)
 			v[i] = v[i] * iv % mod;
 	}
-	clog << "Done\n";
+	clog << "NTT Done: ";
+	for (int i = 0; i < O; ++i) {
+		clog << v[i] << ' ';
+	} clog << '\n';
 }
 
 void initRev(int n) {
@@ -80,13 +83,14 @@ void polyInv(vec &A, vec &B, int n) {
 			C[i] = 2 * B[i] % mod;
 			
 		// init B'^2
+		clog << "Mul B\n";
 		polyMul(B, B, p);
-		/*
+		
 		clog << "B'^2 to:\n";
 		for (int i = 0; i < p; ++i) {
 			clog << B[i] << ' ';
 		} clog << '\n';
-		*/
+		
 		
 		// init A -> tmp
 		for (int i = 0; i < p; ++i) tmp[i] = A[i];
